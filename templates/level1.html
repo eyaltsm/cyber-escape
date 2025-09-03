@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Level 1 - View Source{% endblock %}
+
+{% block content %}
+<div class="level-container">
+    <div class="level-header">
+        <h2>🔍 Level 1: View Source</h2>
+        <div class="level-info">
+            <span class="difficulty">{{ level_info.difficulty }}</span>
+            <span class="points">{{ level_info.points }} points</span>
+            <span class="hints">Hints: {{ hints_available }}/{{ level_info.hints }}</span>
+        </div>
+    </div>
+
+    <div class="level-description">
+        <p>You've infiltrated the first subsystem - the access control panel. 
+        The system is asking for an access code, but it seems to be hidden somewhere...</p>
+        
+        <div class="hint-section">
+            <button onclick="showHint({{ level }})" class="hint-button" {% if hints_available == 0 %}disabled{% endif %}>
+                💡 Get Hint (-10 points)
+            </button>
+            <span class="hint-count">{{ hints_available }} hints remaining</span>
+        </div>
+    </div>
+
+    <div class="access-panel">
+        <div class="panel-header">
+            <h3>🔐 Access Control System</h3>
+            <p>Enter the access code to proceed to the next subsystem</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('level_submit', level=level) }}" class="access-form">
+            <div class="form-group">
+                <label for="code">Access Code:</label>
+                <input type="text" id="code" name="code" placeholder="Enter access code..." required>
+            </div>
+            <button type="submit" class="submit-button">Submit Code</button>
+        </form>
+
+        {% if error %}
+        <div class="error-message">
+            <span class="error-icon">❌</span>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Hidden content that requires investigation -->
+    <div class="hidden-content" style="display: none;">
+        <!-- The style speaks -->
+        <span class="secret-code">FLAG{view_the_style}</span>
+    </div>
+
+    <div class="level-tips">
+        <h4>💡 Investigation Tips:</h4>
+        <ul>
+            <li>Sometimes the answer is right in front of you</li>
+            <li>Web pages can hide information in unexpected places</li>
+            <li>Try viewing the page source or inspecting elements</li>
+            <li>CSS can be used to hide content from view</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+/* Hidden content styles - requires View Source to find */
+.hidden-content {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.secret-code {
+    color: transparent;
+    background: transparent;
+    font-size: 1px;
+}
+
+/* Print styles that reveal the code */
+@media print {
+    .hidden-content {
+        display: block !important;
+        position: static !important;
+        opacity: 1 !important;
+    }
+    
+    .secret-code {
+        color: black !important;
+        background: white !important;
+        font-size: 16px !important;
+    }
+}
+
+/* Additional hidden content in CSS comments - requires CSS inspection */
+.access-panel::before {
+    content: "FLAG{view_the_style}";
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    opacity: 0;
+    pointer-events: none;
+}
+</style>
+{% endblock %}

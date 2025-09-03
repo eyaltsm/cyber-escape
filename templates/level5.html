@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Level 5 - Template Injection{% endblock %}
+
+{% block content %}
+<div class="level-container">
+    <div class="level-header">
+        <h2>🔧 Level 5: Template Injection</h2>
+        <div class="level-info">
+            <span class="difficulty">{{ level_info.difficulty }}</span>
+            <span class="points">{{ level_info.points }} points</span>
+            <span class="hints">Hints: {{ hints_available }}/{{ level_info.hints }}</span>
+        </div>
+    </div>
+
+    <div class="level-description">
+        <p>You've accessed the feedback subsystem. The system allows users to submit feedback, 
+        but there might be a way to make it do more than just store messages...</p>
+        
+        <div class="hint-section">
+            <button onclick="showHint({{ level }})" class="hint-button" {% if hints_available == 0 %}disabled{% endif %}>
+                💡 Get Hint (-10 points)
+            </button>
+            <span class="hint-count">{{ hints_available }} hints remaining</span>
+        </div>
+    </div>
+
+    <div class="feedback-panel">
+        <div class="panel-header">
+            <h3>💬 Feedback System</h3>
+            <p>Submit your feedback to help improve our security systems</p>
+        </div>
+        
+        <div class="feedback-form">
+            <form id="feedbackForm" class="feedback-form-inner">
+                <div class="form-group">
+                    <label for="feedback">Your Feedback:</label>
+                    <textarea id="feedback" name="feedback" placeholder="Enter your feedback here..." rows="4" required></textarea>
+                </div>
+                <button type="submit" class="submit-button">Submit Feedback</button>
+            </form>
+        </div>
+
+        <div class="feedback-response" id="feedbackResponse" style="display: none;">
+            <h4>📤 Response:</h4>
+            <div class="response-content" id="responseContent"></div>
+        </div>
+    </div>
+
+    <div class="waf-info">
+        <h4>🛡️ WAF (Web Application Firewall) Active</h4>
+        <p>The system has protection against potentially dangerous inputs. Some patterns are blocked:</p>
+        <ul>
+            <li><code>import</code> statements</li>
+            <li><code>eval()</code> and <code>exec()</code> functions</li>
+            <li>OS module access (<code>os.</code>)</li>
+            <li>Subprocess execution</li>
+            <li>Double underscore attributes (<code>__</code>)</li>
+            <li>Global and local variable access</li>
+        </ul>
+    </div>
+
+    <div class="template-examples">
+        <h4>🔍 Template Examples to Try:</h4>
+        <div class="example-grid">
+            <div class="example-item">
+                <code>{{ 7 * 7 }}</code>
+                <span class="example-desc">Mathematical operations</span>
+            </div>
+            <div class="example-item">
+                <code>{{ "hello" + "world" }}</code>
+                <span class="example-desc">String concatenation</span>
+            </div>
+            <div class="example-item">
+                <code>{{ [1,2,3] | length }}</code>
+                <span class="example-desc">List operations</span>
+            </div>
+            <div class="example-item">
+                <code>{{ config.items() }}</code>
+                <span class="example-desc">Configuration access</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flag-submission">
+        <h4>🔑 Submit the Flag</h4>
+        <p>Once you've found the flag through template injection, submit it to proceed:</p>
+        
+        <form method="POST" action="{{ url_for('level_submit', level=level) }}" class="flag-form">
+            <div class="form-group">
+                <label for="code">Flag:</label>
+                <input type="text" id="code" name="code" placeholder="Enter the flag..." required>
+            </div>
+            <button type="submit" class="submit-button">Submit Flag</button>
+        </form>
+
+        {% if error %}
+        <div class="error-message">
+            <span class="error-icon">❌</span>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="level-tips">
+        <h4>💡 Investigation Tips:</h4>
+        <ul>
+            <li>Templates can evaluate expressions and access variables</li>
+            <li>Try mathematical operations first (e.g., <code>{{ 2+2 }}</code>)</li>
+            <li>Look for ways to access system configuration or variables</li>
+            <li>The WAF blocks obvious dangerous patterns, but there are ways around it</li>
+            <li>Sometimes the answer is in the template context itself</li>
+        </ul>
+    </div>
+
+    <div class="ssti-hint">
+        <h4>🔍 Investigation Note:</h4>
+        <p><em>"Templates evaluate"</em></p>
+        <p>This feedback system processes your input through a template engine. What can you make it do?</p>
+    </div>
+</div>
+
+<script>
+document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const feedback = document.getElementById('feedback').value;
+    const responseDiv = document.getElementById('feedbackResponse');
+    const responseContent = document.getElementById('responseContent');
+    
+    // Show loading
+    responseContent.innerHTML = '<div class="loading">Processing feedback...</div>';
+    responseDiv.style.display = 'block';
+    
+    // Submit feedback via AJAX
+    fetch('/level/5/feedback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'feedback=' + encodeURIComponent(feedback)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            responseContent.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+        } else if (data.flag) {
+            responseContent.innerHTML = `
+                <div class="success">✅ ${data.result}</div>
+                <div class="flag-found">🎉 Flag found: <code>${data.flag}</code></div>
+            `;
+        } else {
+            responseContent.innerHTML = `<div class="success">✅ ${data.message}</div>`;
+        }
+    })
+    .catch(error => {
+        responseContent.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+    });
+});
+</script>
+
+<style>
+.feedback-panel {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.feedback-form-inner {
+    margin: 20px 0;
+}
+
+.feedback-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #333;
+    border-radius: 6px;
+    background: #2a2a2a;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    resize: vertical;
+}
+
+.feedback-response {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    border-left: 4px solid #00ff41;
+}
+
+.response-content {
+    font-family: 'Share Tech Mono', monospace;
+    line-height: 1.5;
+}
+
+.loading {
+    color: #ff6b35;
+    font-style: italic;
+}
+
+.success {
+    color: #00ff41;
+}
+
+.error {
+    color: #ff4757;
+}
+
+.flag-found {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    border: 2px solid #00ff41;
+}
+
+.flag-found code {
+    background: #000;
+    color: #00ff41;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.waf-info {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #ff6b35;
+}
+
+.waf-info ul {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.waf-info code {
+    background: #000;
+    color: #ff6b35;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.template-examples {
+    margin: 20px 0;
+}
+
+.example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.example-item {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #00ff41;
+}
+
+.example-item code {
+    display: block;
+    background: #000;
+    color: #00ff41;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+}
+
+.example-desc {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.flag-submission {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #00ff41;
+}
+
+.ssti-hint {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 4px solid #ff6b35;
+}
+</style>
+{% endblock %}

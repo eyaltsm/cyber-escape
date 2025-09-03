@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Escape - Agent Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="registration-container">
+            <div class="logo">
+                <h1>🕵️ Cyber Escape</h1>
+                <p class="subtitle">Top Secret Agent Registration</p>
+            </div>
+            
+            <div class="registration-form">
+                <div class="mission-brief">
+                    <h2>🔐 Agent Identity Required</h2>
+                    <p>Welcome to the Cyber Escape mission, agent. Before you can access classified systems, you must establish your identity.</p>
+                    <p>Choose a codename that will be used throughout your mission. This will be your identity in our records.</p>
+                </div>
+                
+                {% if error %}
+                <div class="error-message">
+                    <span class="error-icon">⚠️</span>
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                <form method="POST" class="agent-form">
+                    <div class="form-group">
+                        <label for="username">Agent Codename:</label>
+                        <input type="text" id="username" name="username" required 
+                               placeholder="Enter your codename (3-20 characters)"
+                               pattern="[a-zA-Z0-9_-]{3,20}"
+                               title="3-20 characters, letters, numbers, underscores, hyphens only">
+                        <small>Only letters, numbers, underscores (_), and hyphens (-) allowed</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">🚀</span>
+                        Initialize Mission
+                    </button>
+                </form>
+                
+                <div class="registration-info">
+                    <h3>📋 Registration Details</h3>
+                    <ul>
+                        <li>Your codename will be visible on the leaderboard</li>
+                        <li>Progress and scores are tied to your identity</li>
+                        <li>You can use the same codename in future sessions</li>
+                        <li>All mission data is classified and secure</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mission-preview">
+                <h3>🎯 Mission Overview</h3>
+                <div class="level-preview">
+                    <div class="level-item">
+                        <span class="level-number">1</span>
+                        <span class="level-name">View Source</span>
+                        <span class="level-diff easy">Easy</span>
+                    </div>
+                    <div class="level-item">
+                        <span class="level-number">2</span>
+                        <span class="level-name">Unicode Tricks</span>
+                        <span class="level-diff easy-med">Easy-Med</span>
+                    </div>
+                    <div class="level-item">
+                        <span class="level-number">3</span>
+                        <span class="level-name">EXIF Metadata</span>
+                        <span class="level-diff easy-med">Easy-Med</span>
+                    </div>
+                    <div class="level-item">
+                        <span class="level-number">4</span>
+                        <span class="level-name">Git History</span>
+                        <span class="level-diff medium">Medium</span>
+                    </div>
+                    <div class="level-item">
+                        <span class="level-number">5</span>
+                        <span class="level-name">Template Injection</span>
+                        <span class="level-diff med-hard">Med-Hard</span>
+                    </div>
+                    <div class="level-item">
+                        <span class="level-number">6</span>
+                        <span class="level-name">Race Condition</span>
+                        <span class="level-diff hard">Hard</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('username');
+            const submitBtn = document.querySelector('.btn-primary');
+            
+            usernameInput.addEventListener('input', function() {
+                const value = this.value;
+                const isValid = /^[a-zA-Z0-9_-]{3,20}$/.test(value);
+                
+                if (isValid) {
+                    this.classList.remove('invalid');
+                    this.classList.add('valid');
+                    submitBtn.disabled = false;
+                } else {
+                    this.classList.remove('valid');
+                    this.classList.add('invalid');
+                    submitBtn.disabled = true;
+                }
+            });
+            
+            // Add typing effect to subtitle
+            const subtitle = document.querySelector('.subtitle');
+            const text = subtitle.textContent;
+            subtitle.textContent = '';
+            
+            let i = 0;
+            const typeWriter = () => {
+                if (i < text.length) {
+                    subtitle.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                }
+            };
+            
+            setTimeout(typeWriter, 1000);
+        });
+    </script>
+</body>
+</html>

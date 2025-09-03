@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Cyber Escape - Mission Control{% endblock %}
+
+{% block content %}
+<div class="mission-briefing">
+    <div class="agent-header">
+        <div class="agent-info">
+            <h2>🕵️ Agent {{ username }}</h2>
+            <p class="agent-status">Status: <span class="status-active">ACTIVE</span></p>
+        </div>
+        <div class="mission-stats">
+            <div class="stat-item">
+                <span class="stat-label">Levels Completed</span>
+                <span class="stat-value">{{ completed_count }}/6</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Score</span>
+                <span class="stat-value">{{ total_score }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mission-objective">
+        <h3>🎯 Mission Objective</h3>
+        <p>You are a cybersecurity agent investigating a compromised research facility. Each level represents a different security system that has been breached. Your mission is to exploit these vulnerabilities to gather intelligence and complete your investigation.</p>
+        <p><strong>Warning:</strong> The facility's security systems are actively monitoring for unauthorized access. Use your skills wisely.</p>
+    </div>
+</div>
+
+<div class="game-world">
+    <div class="facility-map">
+        <h3>🏢 Facility Layout</h3>
+        <div class="level-grid">
+            {% for level_num, level_info in levels.items() %}
+            <div class="level-card {% if level_num in progress %}completed{% elif level_num == 1 or (level_num - 1) in progress %}available{% else %}locked{% endif %}">
+                <div class="level-header">
+                    <span class="level-number">{{ level_num }}</span>
+                    <span class="level-difficulty {{ level_info.difficulty.lower().replace('-', '_') }}">
+                        {{ level_info.difficulty }}
+                    </span>
+                </div>
+                <h4 class="level-name">{{ level_info.name }}</h4>
+                <p class="level-description">
+                    {% if level_num == 1 %}
+                        Hidden in plain sight - inspect the source
+                    {% elif level_num == 2 %}
+                        Looks can be deceiving - watch for Unicode tricks
+                    {% elif level_num == 3 %}
+                        Pictures remember more than pixels - check metadata
+                    {% elif level_num == 4 %}
+                        Past commits remember secrets - explore Git history
+                    {% elif level_num == 5 %}
+                        Templates can bite back - bypass the WAF
+                    {% elif level_num == 6 %}
+                        Time is of the essence - exploit race conditions
+                    {% endif %}
+                </p>
+                <div class="level-status">
+                    {% if level_num in progress %}
+                        <span class="status-completed">✅ COMPLETED</span>
+                        <span class="completion-time">{{ progress[level_num]|string|truncate(16, true, '') }}</span>
+                    {% else %}
+                        {% if level_num == 1 or (level_num - 1) in progress %}
+                            <a href="{{ url_for('level_view', level=level_num) }}" class="btn btn-primary">
+                                <span class="btn-icon">🚪</span>
+                                Enter System
+                            </a>
+                        {% else %}
+                            <span class="status-locked">🔒 LOCKED</span>
+                            <small>Complete previous level first</small>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="level-points">
+                    <span class="points-badge">{{ level_info.points }} pts</span>
+                    <span class="hints-badge">{{ level_info.hints }} hints</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="mission-sidebar">
+        <div class="leaderboard-section">
+            <h3>🏆 Top Agents</h3>
+            <div class="leaderboard">
+                {% if leaderboard %}
+                    {% for player in leaderboard %}
+                    <div class="leaderboard-item {% if player.username == username %}current-user{% endif %}">
+                        <span class="rank">{{ loop.index }}</span>
+                        <span class="player-name">{{ player.username }}</span>
+                        <span class="player-score">{{ player.score }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-data">No agents have completed missions yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mission-tips">
+            <h3>💡 Mission Tips</h3>
+            <ul>
+                <li>Always inspect the source code first</li>
+                <li>Use browser developer tools</li>
+                <li>Check for hidden files and metadata</li>
+                <li>Look for patterns in the data</li>
+                <li>Sometimes the obvious is the answer</li>
+            </ul>
+        </div>
+        
+        <div class="quick-actions">
+            <h3>⚡ Quick Actions</h3>
+            <a href="{{ url_for('admin') }}" class="btn btn-secondary btn-small">
+                <span class="btn-icon">🔧</span>
+                Admin Panel
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if completed_count == 6 %}
+<div class="mission-complete">
+    <div class="completion-banner">
+        <h2>🎉 Mission Accomplished!</h2>
+        <p>Congratulations, Agent {{ username }}! You have successfully completed all security challenges.</p>
+        <a href="{{ url_for('complete') }}" class="btn btn-success btn-large">
+            <span class="btn-icon">🏆</span>
+            Claim Your Reward
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div class="mission-footer">
+    <div class="security-notice">
+        <p>🔒 This is a controlled environment for educational purposes. All activities are monitored and logged.</p>
+    </div>
+</div>
+{% endblock %}

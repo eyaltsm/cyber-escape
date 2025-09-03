@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Level 4 - Git History{% endblock %}
+
+{% block content %}
+<div class="level-container">
+    <div class="level-header">
+        <h2>📚 Level 4: Git History</h2>
+        <div class="level-info">
+            <span class="difficulty">{{ level_info.difficulty }}</span>
+            <span class="points">{{ level_info.points }} points</span>
+            <span class="hints">Hints: {{ hints_available }}/{{ level_info.hints }}</span>
+        </div>
+    </div>
+
+    <div class="level-description">
+        <p>You've accessed the source code repository subsystem. The developers have been working on this project, 
+        and Git remembers everything - even deleted secrets...</p>
+        
+        <div class="hint-section">
+            <button onclick="showHint({{ level }})" class="hint-button" {% if hints_available == 0 %}disabled{% endif %}>
+                💡 Get Hint (-10 points)
+            </button>
+            <span class="hint-count">{{ hints_available }} hints remaining</span>
+        </div>
+    </div>
+
+    <div class="git-repository">
+        <div class="panel-header">
+            <h3>📁 Source Code Repository</h3>
+            <p>Examine the Git repository for any hidden information</p>
+        </div>
+        
+        <div class="repo-info">
+            <div class="repo-details">
+                <p><strong>Repository:</strong> research-lab-core</p>
+                <p><strong>Branch:</strong> main</p>
+                <p><strong>Last Commit:</strong> 2 hours ago</p>
+                <p><strong>Status:</strong> Clean working directory</p>
+            </div>
+        </div>
+
+        <div class="git-commands">
+            <h4>🔧 Available Git Commands:</h4>
+            <div class="command-list">
+                <div class="command-item">
+                    <code>git log --oneline</code>
+                    <span class="command-desc">View commit history</span>
+                </div>
+                <div class="command-item">
+                    <code>git show &lt;commit-hash&gt;</code>
+                    <span class="command-desc">Show commit details</span>
+                </div>
+                <div class="command-item">
+                    <code>git blame &lt;filename&gt;</code>
+                    <span class="command-desc">Show line-by-line history</span>
+                </div>
+                <div class="command-item">
+                    <code>git diff &lt;commit1&gt;..&lt;commit2&gt;</code>
+                    <span class="command-desc">Show differences between commits</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="file-explorer">
+            <h4>📂 Repository Files:</h4>
+            <div class="file-tree">
+                <div class="file-item">
+                    <span class="file-icon">📄</span>
+                    <span class="file-name">main.py</span>
+                    <span class="file-status">Modified 2 hours ago</span>
+                </div>
+                <div class="file-item">
+                    <span class="file-icon">📄</span>
+                    <span class="file-name">config.py</span>
+                    <span class="file-status">Deleted 1 hour ago</span>
+                </div>
+                <div class="file-item">
+                    <span class="file-icon">📄</span>
+                    <span class="file-name">README.md</span>
+                    <span class="file-status">Modified 3 hours ago</span>
+                </div>
+                <div class="file-item">
+                    <span class="file-icon">📁</span>
+                    <span class="file-name">src/</span>
+                    <span class="file-status">Directory</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="git-terminal">
+            <h4>💻 Git Terminal (Simulated):</h4>
+            <div class="terminal-output" id="terminal-output">
+                <div class="terminal-line">
+                    <span class="prompt">$</span> <span class="command">git log --oneline</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">a1b2c3d (HEAD -> main) Update main.py with new features</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">e4f5g6h Remove config.py (contains sensitive data)</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">i7j8k9l Initial commit with project structure</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">$</span> <span class="command">git show e4f5g6h</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">commit e4f5g6h</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">Author: Developer &lt;dev@lab.com&gt;</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">Date: 1 hour ago</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output"></span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">    Remove config.py (contains sensitive data)</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output"></span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">diff --git a/config.py b/config.py</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">deleted file mode 100644</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">index 1234567..0000000</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">--- a/config.py</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">+++ /dev/null</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">@@ -1,5 +1,0 @@</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">-API_KEY = "sk-1234567890abcdef"</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">-SECRET_FLAG = "***REDACTED***"</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">-DEBUG = True</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">-DATABASE_URL = "sqlite:///lab.db"</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flag-submission">
+        <h4>🔑 Submit the Flag</h4>
+        <p>Once you've found the hidden information in the Git history, submit the flag to proceed:</p>
+        
+        <form method="POST" action="{{ url_for('level_submit', level=level) }}" class="flag-form">
+            <div class="form-group">
+                <label for="code">Flag:</label>
+                <input type="text" id="code" name="code" placeholder="Enter the flag..." required>
+            </div>
+            <button type="submit" class="submit-button">Submit Flag</button>
+        </form>
+
+        {% if error %}
+        <div class="error-message">
+            <span class="error-icon">❌</span>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="level-tips">
+        <h4>💡 Investigation Tips:</h4>
+        <ul>
+            <li>Git never truly deletes information - it's all in the history</li>
+            <li>Use <code>git show</code> to examine deleted files</li>
+            <li>Look for commits that mention "sensitive data" or "remove"</li>
+            <li>Check the diff output for any hidden information</li>
+            <li>Sometimes secrets are accidentally committed and then "removed"</li>
+        </ul>
+    </div>
+
+    <div class="git-hint">
+        <h4>🔍 Investigation Note:</h4>
+        <p><em>"Past commits remember"</em></p>
+        <p>The developers tried to clean up sensitive data, but Git has a long memory...</p>
+    </div>
+</div>
+
+<style>
+.git-repository {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.repo-info {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+
+.repo-details p {
+    margin: 5px 0;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.git-commands {
+    margin: 20px 0;
+}
+
+.command-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.command-item {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #00ff41;
+}
+
+.command-item code {
+    display: block;
+    background: #000;
+    color: #00ff41;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.command-desc {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.file-explorer {
+    margin: 20px 0;
+}
+
+.file-tree {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #333;
+}
+
+.file-item:last-child {
+    border-bottom: none;
+}
+
+.file-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.file-name {
+    flex: 1;
+    font-family: 'Share Tech Mono', monospace;
+    color: #00ff41;
+}
+
+.file-status {
+    color: #999;
+    font-size: 14px;
+}
+
+.git-terminal {
+    margin: 20px 0;
+}
+
+.terminal-output {
+    background: #000;
+    color: #00ff41;
+    padding: 20px;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.terminal-line {
+    margin: 2px 0;
+}
+
+.prompt {
+    color: #ff6b35;
+}
+
+.command {
+    color: #fff;
+}
+
+.output {
+    color: #00ff41;
+}
+
+.flag-submission {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #00ff41;
+}
+
+.git-hint {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 4px solid #ff6b35;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Level 2 - Unicode Tricks{% endblock %}
+
+{% block content %}
+<div class="level-container">
+    <div class="level-header">
+        <h2>🔤 Level 2: Unicode Tricks</h2>
+        <div class="level-info">
+            <span class="difficulty">{{ level_info.difficulty }}</span>
+            <span class="points">{{ level_info.points }} points</span>
+            <span class="hints">Hints: {{ hints_available }}/{{ level_info.hints }}</span>
+        </div>
+    </div>
+
+    <div class="level-description">
+        <p>You've reached the authentication subsystem. The login form looks normal, 
+        but there's something strange about the credentials...</p>
+        
+        <div class="hint-section">
+            <button onclick="showHint({{ level }})" class="hint-button" {% if hints_available == 0 %}disabled{% endif %}>
+                💡 Get Hint (-10 points)
+            </button>
+            <span class="hint-count">{{ hints_available }} hints remaining</span>
+        </div>
+    </div>
+
+    <div class="login-panel">
+        <div class="panel-header">
+            <h3>🔑 Authentication System</h3>
+            <p>Enter the correct username and password to proceed</p>
+        </div>
+        
+        <div class="credentials-display">
+            <div class="credential-item">
+                <strong>Username:</strong> 
+                <span class="username" id="username-display">admin</span>
+                <button onclick="copyToClipboard('admin')" class="copy-btn">Copy</button>
+            </div>
+            <div class="credential-item">
+                <strong>Password:</strong> 
+                <span class="password" id="password-display">secret</span>
+                <button onclick="copyToClipboard('secret')" class="copy-btn">Copy</button>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('level_submit', level=level) }}" class="login-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter username..." required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password" placeholder="Enter password..." required>
+            </div>
+            <button type="submit" class="submit-button">Login</button>
+        </form>
+
+        {% if error %}
+        <div class="error-message">
+            <span class="error-icon">❌</span>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="unicode-hint">
+        <h4>🔍 Investigation Note:</h4>
+        <p>The credentials above look correct, but sometimes things aren't what they seem...</p>
+        <p><em>"Looks the same ≠ same"</em></p>
+    </div>
+
+    <div class="level-tips">
+        <h4>💡 Investigation Tips:</h4>
+        <ul>
+            <li>Copy-paste the credentials exactly as shown</li>
+            <li>Some characters may look identical but have different Unicode values</li>
+            <li>Try using a hex editor or Unicode viewer</li>
+            <li>Check for invisible characters or zero-width spaces</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// The actual credentials with Unicode tricks
+const realUsername = "admin"; // Normal admin
+const realPassword = "secret"; // Normal secret
+
+// But the displayed ones have hidden Unicode characters
+document.getElementById('username-display').textContent = "admin\u200B"; // Zero-width space
+document.getElementById('password-display').textContent = "secret\u200B"; // Zero-width space
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+
+// Override form submission to check credentials
+document.querySelector('.login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    // Check if they match the real credentials (without Unicode tricks)
+    if (username === realUsername && password === realPassword) {
+        // Submit the flag instead
+        const flagInput = document.createElement('input');
+        flagInput.type = 'hidden';
+        flagInput.name = 'code';
+        flagInput.value = 'FLAG{unicode_tricks}';
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("level_submit", level=level) }}';
+        form.appendChild(flagInput);
+        document.body.appendChild(form);
+        form.submit();
+    } else {
+        // Show error
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = '<span class="error-icon">❌</span> Invalid credentials. Try copying them exactly.';
+        
+        const existingError = document.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        document.querySelector('.login-form').appendChild(errorDiv);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cyber Escape{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🕵️ Cyber Escape</h1>
+                {% if session.get('username') %}
+                <span class="agent-codename">Agent {{ session.get('username') }}</span>
+                {% endif %}
+            </div>
+            <nav class="nav">
+                <a href="{{ url_for('home') }}" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    Home
+                </a>
+                {% if session.get('username') %}
+                <a href="{{ url_for('profile') }}" class="nav-link">
+                    <span class="nav-icon">👤</span>
+                    Profile
+                </a>
+                <a href="{{ url_for('admin') }}" class="nav-link">
+                    <span class="nav-icon">🔧</span>
+                    Admin
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Cyber Escape - Educational Cybersecurity Challenge</p>
+            <p>This is a controlled environment for learning purposes</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global functions
+        function showHint(level) {
+            fetch(`/level/${level}/hint`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert(`Hint: ${data.hint}\nHints left: ${data.hints_left}\nScore: ${data.score}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to get hint');
+                });
+        }
+
+        function updateBalance() {
+            fetch('/race/balance')
+                .then(response => response.json())
+                .then(data => {
+                    const balanceElement = document.getElementById('balance');
+                    if (balanceElement) {
+                        balanceElement.textContent = data.balance;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating balance:', error);
+                });
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to level cards
+            const levelCards = document.querySelectorAll('.level-card');
+            levelCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Add typing effect to agent codename
+            const codename = document.querySelector('.agent-codename');
+            if (codename) {
+                const text = codename.textContent;
+                codename.textContent = '';
+                
+                let i = 0;
+                const typeWriter = () => {
+                    if (i < text.length) {
+                        codename.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 100);
+                    }
+                };
+                
+                setTimeout(typeWriter, 500);
+            }
+        });
+    </script>
+</body>
+</html>

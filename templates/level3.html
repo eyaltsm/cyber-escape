@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Level 3 - EXIF Metadata{% endblock %}
+
+{% block content %}
+<div class="level-container">
+    <div class="level-header">
+        <h2>📸 Level 3: EXIF Metadata</h2>
+        <div class="level-info">
+            <span class="difficulty">{{ level_info.difficulty }}</span>
+            <span class="points">{{ level_info.points }} points</span>
+            <span class="hints">Hints: {{ hints_available }}/{{ level_info.hints }}</span>
+        </div>
+    </div>
+
+    <div class="level-description">
+        <p>You've accessed the surveillance subsystem. There's a security camera image here, 
+        but it might contain more information than meets the eye...</p>
+        
+        <div class="hint-section">
+            <button onclick="showHint({{ level }})" class="hint-button" {% if hints_available == 0 %}disabled{% endif %}>
+                💡 Get Hint (-10 points)
+            </button>
+            <span class="hint-count">{{ hints_available }} hints remaining</span>
+        </div>
+    </div>
+
+    <div class="surveillance-panel">
+        <div class="panel-header">
+            <h3>📹 Security Camera Feed</h3>
+            <p>Examine this image for any hidden information</p>
+        </div>
+        
+        <div class="image-container">
+            <img src="{{ url_for('static', filename='img/security_camera.png') }}" 
+                 alt="Security Camera Feed" class="surveillance-image">
+            
+            <div class="image-info">
+                <p><strong>File:</strong> security_camera_feed.png</p>
+                <p><strong>Size:</strong> 400x300 pixels</p>
+                <p><strong>Type:</strong> PNG Image</p>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <a href="{{ url_for('static', filename='img/security_camera.png') }}" 
+               download="security_camera_feed.png" class="download-button">
+                📥 Download Image
+            </a>
+        </div>
+    </div>
+
+    <div class="flag-submission">
+        <h4>🔑 Submit the Flag</h4>
+        <p>Once you've found the hidden information, submit the flag to proceed:</p>
+        
+        <form method="POST" action="{{ url_for('level_submit', level=level) }}" class="flag-form">
+            <div class="form-group">
+                <label for="code">Flag:</label>
+                <input type="text" id="code" name="code" placeholder="Enter the flag..." required>
+            </div>
+            <button type="submit" class="submit-button">Submit Flag</button>
+        </form>
+
+        {% if error %}
+        <div class="error-message">
+            <span class="error-icon">❌</span>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="level-tips">
+        <h4>💡 Investigation Tips:</h4>
+        <ul>
+            <li>Download the image and examine it with metadata tools</li>
+            <li>Use tools like exiftool, Exif Viewer, or online metadata extractors</li>
+            <li>Check for hidden comments, GPS data, or other metadata</li>
+            <li>Sometimes the answer is embedded in the image file itself</li>
+            <li>Look for hidden text or comments in the metadata</li>
+        </ul>
+    </div>
+
+    <div class="metadata-hint">
+        <h4>🔍 Investigation Note:</h4>
+        <p><em>"Pictures remember more than pixels"</em></p>
+        <p>This image contains metadata that might reveal the access code...</p>
+    </div>
+</div>
+
+<style>
+.surveillance-image {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #333;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.image-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.image-info {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.download-section {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.download-button {
+    display: inline-block;
+    background: #00ff41;
+    color: #000;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.download-button:hover {
+    background: #00cc33;
+    transform: translateY(-2px);
+}
+
+.flag-submission {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #00ff41;
+}
+
+.metadata-hint {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 4px solid #ff6b35;
+}
+</style>
+{% endblock %}

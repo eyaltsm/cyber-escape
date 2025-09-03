@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="agent-profile">
+            <div class="profile-avatar">
+                <span class="avatar-icon">🕵️</span>
+            </div>
+            <div class="profile-info">
+                <h1>Agent {{ username }}</h1>
+                <p class="agent-rank">Rank: #{{ ranking }}</p>
+                <p class="agent-status">Status: <span class="status-active">ACTIVE</span></p>
+            </div>
+        </div>
+        
+        <div class="profile-stats">
+            <div class="stat-card">
+                <span class="stat-icon">🏆</span>
+                <span class="stat-value">{{ total_score }}</span>
+                <span class="stat-label">Total Score</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">✅</span>
+                <span class="stat-value">{{ completed_levels|length }}/6</span>
+                <span class="stat-label">Levels Completed</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-value">{{ total_attempts }}</span>
+                <span class="stat-label">Total Attempts</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="achievements-section">
+            <h2>🏅 Achievements & Progress</h2>
+            <div class="level-progress">
+                {% for level_num, level_info in levels.items() %}
+                <div class="level-achievement {% if level_num in completed_levels %}completed{% else %}incomplete{% endif %}">
+                    <div class="achievement-header">
+                        <span class="level-number">{{ level_num }}</span>
+                        <span class="level-name">{{ level_info.name }}</span>
+                        <span class="achievement-status">
+                            {% if level_num in completed_levels %}
+                                <span class="status-completed">✅ COMPLETED</span>
+                            {% else %}
+                                <span class="status-incomplete">⏳ PENDING</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if level_num in completed_levels %}
+                    <div class="achievement-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Completion Time:</span>
+                            <span class="detail-value">{{ level_stats.get(level_num, {}).get('solved_at', 'N/A')|string|truncate(16, true, '') }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Hints Used:</span>
+                            <span class="detail-value">{{ level_stats.get(level_num, {}).get('hints_used', 0) }}/{{ level_info.hints }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Points Earned:</span>
+                            <span class="detail-value">{{ level_info.points }} pts</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="achievement-details">
+                        <p class="pending-message">Complete this level to unlock achievement details</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="profile-sidebar">
+            <div class="performance-metrics">
+                <h3>📊 Performance Metrics</h3>
+                <div class="metric-item">
+                    <span class="metric-label">Completion Rate</span>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width: {{ (completed_levels|length / 6 * 100)|round }}%"></div>
+                    </div>
+                    <span class="metric-value">{{ (completed_levels|length / 6 * 100)|round }}%</span>
+                </div>
+                
+                <div class="metric-item">
+                    <span class="metric-label">Efficiency Score</span>
+                    <div class="metric-bar">
+                        {% set efficiency = (total_score / (completed_levels|length * 100) * 100) if completed_levels|length > 0 else 0 %}
+                        <div class="metric-fill" style="width: {{ efficiency|round }}%"></div>
+                    </div>
+                    <span class="metric-value">{{ efficiency|round }}%</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>⚡ Quick Actions</h3>
+                <a href="{{ url_for('home') }}" class="btn btn-primary btn-full">
+                    <span class="btn-icon">🏠</span>
+                    Return to Mission
+                </a>
+                <a href="{{ url_for('admin') }}" class="btn btn-secondary btn-full">
+                    <span class="btn-icon">🔧</span>
+                    Admin Panel
+                </a>
+            </div>
+
+            <div class="mission-tips">
+                <h3>💡 Pro Tips</h3>
+                <ul>
+                    <li>Use hints strategically to maximize score</li>
+                    <li>Complete levels quickly for time bonuses</li>
+                    <li>Check the leaderboard for motivation</li>
+                    <li>Practice makes perfect - don't give up!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% if completed_levels|length == 6 %}
+    <div class="completion-celebration">
+        <div class="celebration-content">
+            <h2>🎉 Mission Accomplished!</h2>
+            <p>Congratulations, Agent {{ username }}! You have successfully completed all security challenges and proven yourself as a master cybersecurity agent.</p>
+            <a href="{{ url_for('complete') }}" class="btn btn-success btn-large">
+                <span class="btn-icon">🏆</span>
+                Claim Your Final Reward
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 50, 0, 0.4) 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    border: 2px solid var(--accent-primary);
+    box-shadow: 0 10px 30px rgba(0, 255, 0, 0.1);
+}
+
+.agent-profile {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+}
+
+.profile-info h1 {
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+.agent-rank {
+    color: var(--accent-secondary);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.agent-status {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.status-active {
+    color: var(--success-color);
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--success-color);
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-icon {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    display: block;
+    color: var(--accent-primary);
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.profile-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.achievements-section h2 {
+    color: var(--accent-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.level-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.level-achievement {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.level-achievement.completed {
+    border-color: var(--success-color);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+}
+
+.level-achievement:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.achievement-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.level-number {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.level-name {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.achievement-status {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.status-completed {
+    color: var(--success-color);
+}
+
+.status-incomplete {
+    color: var(--text-secondary);
+}
+
+.achievement-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.detail-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    color: var(--accent-secondary);
+    font-weight: bold;
+}
+
+.pending-message {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+
+.profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.performance-metrics, .quick-actions, .mission-tips {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.performance-metrics h3, .quick-actions h3, .mission-tips h3 {
+    color: var(--accent-primary);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.metric-item {
+    margin-bottom: 1rem;
+}
+
+.metric-label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.metric-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.metric-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transition: width 0.5s ease;
+}
+
+.metric-value {
+    color: var(--accent-primary);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.btn-full {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.mission-tips ul {
+    list-style: none;
+    padding: 0;
+}
+
+.mission-tips li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.mission-tips li:before {
+    content: "💡";
+    position: absolute;
+    left: 0;
+}
+
+.completion-celebration {
+    background: linear-gradient(135deg, rgba(0, 100, 0, 0.8) 0%, rgba(0, 0, 0, 0.8) 100%);
+    padding: 3rem;
+    border-radius: 15px;
+    text-align: center;
+    border: 3px solid var(--success-color);
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+}
+
+.celebration-content h2 {
+    color: var(--success-color);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 20px var(--success-color);
+}
+
+.celebration-content p {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .agent-profile {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
