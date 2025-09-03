@@ -212,9 +212,18 @@ function parallelAttack(count) {
             progressFill.style.width = (completed / count * 100) + '%';
             
             if (data.success) {
-                statusText.textContent = `🎉 Success! Flag: ${data.flag}`;
-                updateBalance();
-                return data;
+                if (data.level_completed) {
+                    // Level 6 completed! Redirect to completion page
+                    statusText.textContent = `🎉 Level 6 completed! Flag: ${data.flag}`;
+                    setTimeout(() => {
+                        window.location.href = '/complete';
+                    }, 2000);
+                    return data;
+                } else {
+                    statusText.textContent = `🎉 Success! Flag: ${data.flag}`;
+                    updateBalance();
+                    return data;
+                }
             } else {
                 statusText.textContent = `Attempt ${completed}: ${data.error}`;
                 return null;
@@ -242,6 +251,50 @@ function parallelAttack(count) {
 
 // Auto-update balance every 5 seconds
 setInterval(updateBalance, 5000);
+
+function resetBalance() {
+    fetch('/race/reset', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`🔄 Balance reset to ${data.balance}p`);
+            updateBalance();
+        } else {
+            alert('❌ Reset failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error during reset');
+    });
+}
+
+function manualComplete() {
+    fetch('/race/complete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Level 6 completed manually!');
+            window.location.href = '/complete';
+        } else {
+            alert('❌ Manual completion failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error during manual completion');
+    });
+}
 </script>
 
 <style>
@@ -370,6 +423,28 @@ setInterval(updateBalance, 5000);
 
 .attack-btn:hover {
     background: #ff5722;
+    transform: translateY(-2px);
+}
+
+.reset-btn, .complete-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+.complete-btn:hover {
+    background: #218838;
     transform: translateY(-2px);
 }
 
