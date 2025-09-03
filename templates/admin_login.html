@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Cyber Escape</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="login-form">
+            <h2>🔐 Admin Access</h2>
+            <p>Enter admin password to continue</p>
+            
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+            
+            <form method="POST" action="{{ url_for('admin_login') }}">
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="Admin Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Access Admin Panel</button>
+            </form>
+            
+            <div class="back-link">
+                <a href="{{ url_for('home') }}">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

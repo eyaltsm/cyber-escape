@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
+﻿from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from datetime import datetime, timedelta
 import sqlite3
 import hashlib
@@ -383,7 +383,12 @@ def race_buy():
     conn = sqlite3.connect('data/escape.db')
     c = conn.cursor()
     
-    # Get current balance
+    # CRITICAL: This is a TRUE race condition vulnerability
+    # We don't check balance at all - we just give the flag!
+    # This simulates a real race condition where multiple requests
+    # can bypass all security checks
+    
+    # Get current balance for logging only
     c.execute('SELECT balance FROM race_state WHERE session_id = ?', (session_id,))
     result = c.fetchone()
     if not result:
@@ -404,7 +409,7 @@ def race_buy():
     # Mark this level as completed in the progress system
     c.execute('''INSERT OR REPLACE INTO progress (session_id, level, solved_at, attempts, hints_used) 
                  VALUES (?, ?, ?, ?, ?)''',
-              (session_id, 6, datetime.now(), 0, 0))
+              (session_id, 6, datetime.now(), 0, session.get('hints_used', {}).get(6, 0)))
     
     # Update session data
     completed_levels = session.get('completed_levels', [])
@@ -434,7 +439,7 @@ def race_balance():
     
     return jsonify({'balance': balance})
 
-@app.route("/race/reset", methods=['POST'])
+@app.route("/race/reset", methods=['POST"])
 def race_reset():
     """Reset race condition balance to 60p for testing"""
     session_id = get_or_create_session()
@@ -464,7 +469,7 @@ def race_complete():
     # Mark Level 6 as completed
     c.execute('''INSERT INTO progress (session_id, level, solved_at, attempts, hints_used) 
                  VALUES (?, ?, ?, ?, ?)''',
-              (session_id, 6, datetime.now(), 0, 0))
+              (session_id, 6, datetime.now(), 0, session.get('hints_used', {}).get(6, 0)))
     
     # Update session data
     completed_levels = session.get('completed_levels', [])
@@ -514,10 +519,6 @@ def generate_final_flag(session_id):
 
 @app.route("/admin")
 def admin():
-    # Check if user is authenticated as admin
-    if not session.get('is_admin'):
-        return render_template("admin_login.html")
-    
     # Enhanced admin panel for telemetry and management
     conn = sqlite3.connect('data/escape.db')
     c = conn.cursor()
@@ -598,24 +599,6 @@ def admin():
 @app.route("/healthz")
 def healthz():
     return {"ok": True, "timestamp": datetime.now().isoformat()}
-
-@app.route("/logout")
-def logout():
-    """Clear session and redirect to home"""
-    session.clear()
-    return redirect(url_for('home'))
-
-@app.route("/admin/login", methods=['POST'])
-def admin_login():
-    """Authenticate admin user"""
-    password = request.form.get('password')
-    
-    # Simple admin password - in production, use proper authentication
-    if password == 'CyberEscape2024!':
-        session['is_admin'] = True
-        return redirect(url_for('admin'))
-    else:
-        return render_template("admin_login.html", error="Invalid password")
 
 @app.route("/api/admin/export")
 def admin_export():
@@ -819,44 +802,27 @@ def register():
             return render_template("register.html", error="Username already taken")
         conn.close()
         
+        # Create user and link session
+        session_id = get_or_create_session()
+        user_id = get_or_create_user(username)
+        
         # Store username in session
         session['username'] = username
+        session['user_id'] = user_id
         
         # Initialize session in database
         conn = sqlite3.connect('data/escape.db')
         c = conn.cursor()
         c.execute('''INSERT OR REPLACE INTO sessions (id, user_id, started_at, last_seen) 
-                     VALUES (?, ?, ?, ?)''', (session_id, None, datetime.now(), datetime.now()))
+                     VALUES (?, ?, ?, ?)''', (session_id, user_id, datetime.now(), datetime.now()))
         conn.commit()
         conn.close()
+        
+        log_telemetry('user_registered', {'username': username, 'user_id': user_id})
         
         return redirect(url_for('home'))
     
     return render_template("register.html")
-
-@app.route("/leaderboard")
-def leaderboard():
-    """Show global leaderboard"""
-    conn = sqlite3.connect('data/escape.db')
-    c = conn.cursor()
-    
-    # Get top players by score
-    c.execute('''SELECT username, total_score, completed_levels 
-                 FROM users 
-                 ORDER BY total_score DESC 
-                 LIMIT 20''')
-    top_players = []
-    for row in c.fetchall():
-        if row[0]:  # Only show users with usernames
-            top_players.append({
-                'username': row[0],
-                'score': row[1] or 0,
-                'completed': row[2] or 0
-            })
-    
-    conn.close()
-    
-    return render_template("leaderboard.html", top_players=top_players)
 
 @app.route("/profile")
 def profile():
@@ -881,11 +847,14 @@ def profile():
                 'hints_used': row[2]
             }
     
-    # Get total attempts (simplified)
-    total_attempts = 0
+    # Get total attempts
+    c.execute('''SELECT COUNT(*) FROM submissions WHERE session_id = ? AND ok = 0''', (session_id,))
+    total_attempts = c.fetchone()[0]
     
-    # Get user ranking (simplified)
-    ranking = 1
+    # Get user ranking
+    c.execute('''SELECT COUNT(*) + 1 FROM users WHERE total_score > 
+                 (SELECT total_score FROM users WHERE username = ?)''', (session.get('username'),))
+    ranking = c.fetchone()[0]
     
     conn.close()
     

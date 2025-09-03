@@ -122,6 +122,121 @@ h4 { font-size: 1.1em; }
     transform: translateY(-2px);
 }
 
+.logout-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #c82333;
+}
+
+/* Leaderboard Styles */
+.leaderboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.leaderboard-header h1 {
+    color: var(--primary-color);
+    font-size: 2.5em;
+    margin-bottom: 0.5rem;
+}
+
+.leaderboard-header p {
+    color: var(--text-secondary);
+    font-size: 1.2em;
+}
+
+.leaderboard-container {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px solid var(--border-accent);
+}
+
+.leaderboard-table {
+    width: 100%;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 100px;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 100px;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.table-row:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(5px);
+}
+
+.table-row.gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #333;
+}
+
+.table-row.silver {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+    color: #333;
+}
+
+.table-row.bronze {
+    background: linear-gradient(135deg, #cd7f32 0%, #daa520 100%);
+    color: #333;
+}
+
+.rank-col, .score-col, .levels-col {
+    text-align: center;
+    font-weight: bold;
+}
+
+.player-col {
+    font-weight: 500;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.leaderboard-info {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 2rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.leaderboard-info h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.leaderboard-info ul {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.leaderboard-info li {
+    margin-bottom: 0.5rem;
+}
+
 .score {
     background: var(--primary-color);
     color: var(--bg-primary);

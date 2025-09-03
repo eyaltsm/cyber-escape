@@ -20,6 +20,10 @@
                     <span class="nav-icon">🏠</span>
                     Home
                 </a>
+                <a href="{{ url_for('leaderboard') }}" class="nav-link">
+                    <span class="nav-icon">🏆</span>
+                    Leaderboard
+                </a>
                 {% if session.get('username') %}
                 <a href="{{ url_for('profile') }}" class="nav-link">
                     <span class="nav-icon">👤</span>
@@ -28,6 +32,10 @@
                 <a href="{{ url_for('admin') }}" class="nav-link">
                     <span class="nav-icon">🔧</span>
                     Admin
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-link logout-btn">
+                    <span class="nav-icon">🚪</span>
+                    Logout
                 </a>
                 {% endif %}
             </nav>

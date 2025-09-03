@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Cyber Escape</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% extends "base.html" %}
+    
+    {% block content %}
+    <div class="container">
+        <div class="leaderboard-header">
+            <h1>🏆 Global Leaderboard</h1>
+            <p>Top hackers competing for glory</p>
+        </div>
+        
+        <div class="leaderboard-container">
+            {% if top_players %}
+                <div class="leaderboard-table">
+                    <div class="table-header">
+                        <div class="rank-col">Rank</div>
+                        <div class="player-col">Player</div>
+                        <div class="score-col">Score</div>
+                        <div class="levels-col">Levels</div>
+                    </div>
+                    
+                    {% for player in top_players %}
+                    <div class="table-row {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
+                        <div class="rank-col">
+                            {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}#{{ loop.index }}{% endif %}
+                        </div>
+                        <div class="player-col">{{ player.username }}</div>
+                        <div class="score-col">{{ player.score }}</div>
+                        <div class="levels-col">{{ player.completed }}/6</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-data">
+                    <p>No players yet. Be the first to complete the challenge!</p>
+                    <a href="{{ url_for('home') }}" class="btn btn-primary">Start Playing</a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="leaderboard-info">
+            <h3>How to climb the ranks:</h3>
+            <ul>
+                <li>Complete levels quickly for time bonuses</li>
+                <li>Use hints sparingly (they cost points)</li>
+                <li>Solve all 6 levels to maximize your score</li>
+                <li>Practice makes perfect!</li>
+            </ul>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>
